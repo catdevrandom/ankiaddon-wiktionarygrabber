@@ -11,7 +11,7 @@ Unzip the code and copy the folder "bs4" to the Anki Add-On folder.
 
 ## Installation
 
-Download the code and copy it to the Anki Add-On folder.
+Download the code and copy the contents of the "src" folder to the Anki Add-On folder.
 
 ## Usage
 
