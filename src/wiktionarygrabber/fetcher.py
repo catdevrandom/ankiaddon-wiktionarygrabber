@@ -39,29 +39,29 @@ class Fetcher:
         data = urlencode(values)
         data = data.encode('utf-8')
         if self.verbose ==1:
-            print('Fetching URL: ' + self.url)
+            warning('Fetching URL: ' + self.url)
         req = Request(self.url, data)
         response = urlopen(req)
         if self.verbose ==1:
-            print('Received response.')
+            warning('Received response.')
         the_page = BeautifulSoup(response.read().decode('utf-8', 'ignore'), self.parser, from_encoding=self.encoding)
         if the_page:    
             if self.verbose ==1:
-                print('Got a page.')
+                warning('Got a page.')
             the_text = the_page.find('text') #Get the "text" tag in the Beautiful Soup
             if the_text:
                 the_text = the_text.get_text() #Store it as unicode/str
                 if self.verbose == 1:
-                    print('Found the text tag.')
-                    print('Type: ' + str(type(the_text)))
-                    print('Content of text tag: '+ '-----'*10)
-                    print(the_text)
-                    print('-----'*10)
-                    print('-----'*10)
+                    warning('Found the text tag.')
+                    warning('Type: ' + str(type(the_text)))
+                    warning('Content of text tag: '+ '-----'*10)
+                    warning(the_text)
+                    warning('-----'*10)
+                    warning('-----'*10)
                 return the_text
             else:
-                print('Did not get the text tag.')
+                warning('Did not get the text tag.')
                 return False
         else:
-            print('Did not get a page.')
+            warning('Did not get a page.')
             return False

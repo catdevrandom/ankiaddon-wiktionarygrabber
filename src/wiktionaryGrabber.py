@@ -57,6 +57,7 @@ def wiktionaryGrabber(self):
     ipa_field = 'IPA'
     plural_field = "Plural"
     gender_field = "Gender"
+    article_field = "Article"
     self.saveNow();
     self.mw.checkpoint(_("Get info from wiktionary on the current note"))
 
@@ -67,6 +68,7 @@ def wiktionaryGrabber(self):
     
         #Call the grabber method
         myWord = wiktionarygrabber.get_wiktionary_fields(entry, "Dutch")
+        warning(myWord.string().encode("utf-8"))
     
         if myWord:
             for name in mw.col.models.fieldNames(self.note.model()):
@@ -76,6 +78,12 @@ def wiktionaryGrabber(self):
                     self.note[plural_field] = myWord.plural
                 if name==gender_field:
                     self.note[gender_field] = myWord.gender
+                    if myWord.gender in ("m", "f", "m, f", "f, m"):
+                        self.note[article_field] = "de"
+                    elif myWord.gender in ("n"):
+                        self.note[article_field] = "het"
+                    else:
+                        self.note[article_field] = ""
                     
             self.stealFocus = True;
             self.saveNow();
