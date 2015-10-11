@@ -47,8 +47,10 @@ class DutchParser:
                 ipaFull = ipaMatch.group(1)
                 ipaParts = ipaFull.split('|')
                 for item in ipaParts:
-                    if re.match('/([^/]+)/', item, re.S|re.M):
+                    if re.match('[/\[]([^/]+)[/\]]', item, re.S|re.M):
                         self.myWord.ipa = item
+            else:
+                logger.debug('Could not match IPA content')
                 
             audioMatch = re.search('.*?\{\{audio\|([^}]+)\}', pronunciationText, re.I|re.M|re.S)
             if audioMatch:

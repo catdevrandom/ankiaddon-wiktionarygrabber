@@ -105,7 +105,7 @@ def wiktionaryGrabber(self):
                 if name==gender_field:
                     logger.debug("Found gender: '%s'" % myWord.gender)
                     self.note[gender_field] = myWord.gender
-                    if myWord.gender in ("m", "f", "m, f", "f, m"):
+                    if myWord.gender in ("m", "f", "m, f", "f, m","c"):
                         self.note[article_field] = "de"
                     elif myWord.gender == 'n':
                         self.note[article_field] = "het"
