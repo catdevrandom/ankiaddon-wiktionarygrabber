@@ -3,18 +3,16 @@ Created on 8 Oct 2015
 
 @author: MBRANDAOCA
 '''
-from __future__ import print_function
-import sys
-def warning(*objs):
-    print("WARNING: ", *objs, file=sys.stderr)
+import logging
+
+logger = logging.getLogger('ankiwiktionarygrabber')
     
 import re
 from .entities import Word
 import pprint
 
 class DutchParser:
-    def __init__(self, wordName, sourceText, verbose):
-        self.verbose = verbose
+    def __init__(self, wordName, sourceText):
         self.wordName = wordName
         self.sourceText = sourceText
         self.myWord = Word(self.wordName)
@@ -26,12 +24,10 @@ class DutchParser:
         self.myWord.classes = {}
 
     def extractData(self):
-        if (self.verbose):
-            warning(self.sourceText)
+        logger.info(self.sourceText)
         self.getPronunciation()
         self.getWordClasses()
-        if (self.verbose):
-            pprint.pprint(self.myWord.classes)
+        logger.info(pprint.pprint(self.myWord.classes))
         for item in self.myWord.classes.keys():
             if (item == 'Noun'):
                 self.getNoun()
@@ -44,7 +40,7 @@ class DutchParser:
         pronunciationMatch = re.search('={3,4}\s*Pronunciation\s*={3,4}(.*?)={3,4}[^=]+={3,4}', self.sourceText, re.I|re.M|re.S)
         
         if pronunciationMatch:
-            warning('pronunciation match')
+            logger.info('pronunciation match')
             pronunciationText = pronunciationMatch.group(1)
             ipaMatch = re.search('.*?\{\{IPA\|([^}]+)\}\}', pronunciationText, re.I|re.M|re.S)
             if ipaMatch:
@@ -63,7 +59,7 @@ class DutchParser:
                         self.myWord.audio = item
             return True
         else:
-            warning('no pronunciation match')
+            logger.warning('no pronunciation match')
             return False
         
 
@@ -73,18 +69,16 @@ class DutchParser:
         matchClasses = re.finditer('={3,4}\s*(Noun|Adjective|Adverb|Preposition|Article|Numeral|Pronoun|Verb|Postposition|Conjunction|Interjection)\s*={3,4}(.+?)(={3,4}\s*|$)', self.sourceText, re.I|re.S)
         if matchClasses:
             for item in matchClasses:
-                warning(item.group(1))
-                warning(item.group(2))
+                logger.info(item.group(1))
+                logger.info(item.group(2))
                 if item.group(1) not in word_classes:
                     word_classes[item.group(1)] = item.group(2)
                 else:
                     word_classes[item.group(1)+'-2'] = item.group(2) #this needs fixing. allow for more than one entry in each word class
             self.myWord.classes = word_classes
-            if self.verbose:
-                warning(word_classes)
+            logger.info(word_classes)
         else:
-            if self.verbose:
-                warning('Could not find word classes list.')
+            logger.info('Could not find word classes list.')
 
 
                 
@@ -93,19 +87,17 @@ class DutchParser:
         #Plural
         #Diminutive
         #Dutch noun template: {{nl-noun|n|huizen|huisje}}        
-        self.verbose=False
+
         nounContent = self.myWord.classes.get("Noun")
-        if self.verbose:
-            warning('noun content:----------------')
-            warning(nounContent)
-            warning('-------'*10)
+        logger.info('noun content:----------------')
+        logger.info(nounContent)
+        logger.info('-------'*10)
         #Split the parameters
         matchParameters = re.search('\{\{([^}]+)\}\}', nounContent, re.S|re.I|re.M)
         if matchParameters:
             allParameters = matchParameters.group(1)
             allParameters = allParameters.split('|')
-            if self.verbose:
-                warning(allParameters)
+            logger.info(allParameters)
             itemsToPutInTheEnd = []
             for item in allParameters:
                 if item.find('=') > 0:
@@ -120,7 +112,7 @@ class DutchParser:
             if len(allParameters)>3:
                 self.myWord.diminutive = allParameters[3]
         else:
-            warning('no match')        
+            logger.info('no match')        
         return False
             
     def getVerb(self):

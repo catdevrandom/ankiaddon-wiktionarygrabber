@@ -19,10 +19,10 @@
 
 """
 Entry point for WiktionaryGrabber add-on from Anki
-
-
 """
+
 from __future__ import print_function
+import logging
 import sys
 def warning(*objs):
     print("WARNING: ", *objs, file=sys.stderr)
@@ -52,7 +52,26 @@ from aqt import browser
 # import wiktionarygrabber module with the actual code
 import wiktionarygrabber
 
+def initWiktionaryGrabber(self):
+    """ Initialize logging """
+    fileHandler = logging.FileHandler('ankiwiktionarygrabber.log')
+    fileHandler.setLevel(logging.DEBUG)
+    streamHandler = logging.StreamHandler()
+    streamHandler.setLevel(logging.ERROR)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fileHandler.setFormatter(formatter)
+    streamHandler.setFormatter(formatter)
+    
+    logger = logging.getLogger("ankiwiktionarygrabber")
+    logger.addHandler(fileHandler)
+    logger.addHandler(streamHandler)
+    
+    logger.info('Logging started...')
+    wiktionaryGrabber(self)
+    logger.info('Logging finished.')
+
 def wiktionaryGrabber(self):
+    logger = logging.getLogger("ankiwiktionarygrabber")
     """ Utility function that fetches info from Wiktionary to add to the notes."""
     ipa_field = 'IPA'
     plural_field = "Plural"
@@ -62,13 +81,13 @@ def wiktionaryGrabber(self):
     self.mw.checkpoint(_("Get info from wiktionary on the current note"))
 
     if not 'Dutch' in mw.col.models.fieldNames(self.note.model()):
-        warning('This add-on requires a field called "Dutch" (mind the capitalization) to work.')
+        logger.error('This add-on requires a field called "Dutch" (mind the capitalization) to work.')
     else:
         entry = self.note['Dutch']
     
         #Call the grabber method
         myWord = wiktionarygrabber.get_wiktionary_fields(entry, "Dutch")
-        warning(myWord.string().encode("utf-8"))
+        logger.info(myWord.string().encode("utf-8"))
     
         if myWord:
             for name in mw.col.models.fieldNames(self.note.model()):
@@ -89,12 +108,12 @@ def wiktionaryGrabber(self):
             self.saveNow();
             self.loadNote();
         else:
-            warning("Failed to find word '%s' in Dutch. Please check if Wiktionary has it: %s" % (entry, "https://en.wiktionary.org/wiki/"+entry))
+            logger.error("Failed to find word '%s' in Dutch. Please check if Wiktionary has it: %s" % (entry, "https://en.wiktionary.org/wiki/"+entry))
 
 def setupButtons(self):
     """ Adds word wrap keyboard shortcut and button to the note editor. """
     icons_dir = os.path.join(mw.pm.addonFolder(), 'wiktionarygrabber', 'icons')
-    b = self._addButton("wiktionaryButton", lambda s=self: wiktionaryGrabber(self),
+    b = self._addButton("wiktionaryButton", lambda s=self: initWiktionaryGrabber(self),
             text=" ", tip="Add fields with Wiktionary data")
     b.setIcon(QIcon(os.path.join(icons_dir, 'wiktionary.png')))
     

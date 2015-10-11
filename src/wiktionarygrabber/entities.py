@@ -3,9 +3,9 @@ Created on 8 Oct 2015
 
 @author: MBRANDAOCA
 '''
-from __future__ import print_function
-def warning(*objs):
-    print("WARNING: ", *objs, file=sys.stderr)
+import logging
+
+logger = logging.getLogger('ankiwiktionarygrabber')
     
 class Word():
     def __init__(self, entry):

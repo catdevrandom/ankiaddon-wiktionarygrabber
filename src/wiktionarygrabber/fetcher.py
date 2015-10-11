@@ -4,10 +4,10 @@ Created on 8 Oct 2015
 
 @author: MBRANDAOCA
 '''
-from __future__ import print_function
-import sys
-def warning(*objs):
-    print("WARNING: ", *objs, file=sys.stderr)
+import logging
+
+logger = logging.getLogger('ankiwiktionarygrabber')
+
 
 #try:
 #    from urllib.parse import urlparse, urlencode
@@ -23,9 +23,8 @@ from urllib2 import urlopen, Request, HTTPError
 from bs4 import BeautifulSoup
 
 class Fetcher:
-    def __init__(self, verbose):
+    def __init__(self):
         self.url = 'http://en.wiktionary.org/w/index.php?title=Special:Export&action=submit'
-        self.verbose = verbose
         self.parser = "html.parser"
         self.encoding = "utf-8"
         
@@ -38,30 +37,26 @@ class Fetcher:
         values['wpDownload'] = 0
         data = urlencode(values)
         data = data.encode('utf-8')
-        if self.verbose ==1:
-            warning('Fetching URL: ' + self.url)
+        logger.info('Fetching URL: ' + self.url)
         req = Request(self.url, data)
         response = urlopen(req)
-        if self.verbose ==1:
-            warning('Received response.')
+        logger.info('Received response.')
         the_page = BeautifulSoup(response.read().decode('utf-8', 'ignore'), self.parser, from_encoding=self.encoding)
         if the_page:    
-            if self.verbose ==1:
-                warning('Got a page.')
+            logger.info('Got a page.')
             the_text = the_page.find('text') #Get the "text" tag in the Beautiful Soup
             if the_text:
                 the_text = the_text.get_text() #Store it as unicode/str
-                if self.verbose == 1:
-                    warning('Found the text tag.')
-                    warning('Type: ' + str(type(the_text)))
-                    warning('Content of text tag: '+ '-----'*10)
-                    warning(the_text)
-                    warning('-----'*10)
-                    warning('-----'*10)
+                logger.info('Found the text tag.')
+                logger.info('Type: ' + str(type(the_text)))
+                logger.info('Content of text tag: '+ '-----'*10)
+                logger.info(the_text)
+                logger.info('-----'*10)
+                logger.info('-----'*10)
                 return the_text
             else:
-                warning('Did not get the text tag.')
+                logger.warning('Did not get the text tag.')
                 return False
         else:
-            warning('Did not get a page.')
+            logger.warning('Did not get a page.')
             return False

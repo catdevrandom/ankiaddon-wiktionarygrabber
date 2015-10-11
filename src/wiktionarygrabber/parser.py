@@ -3,16 +3,16 @@ Created on 8 Oct 2015
 
 @author: MBRANDAOCA
 '''
-from __future__ import print_function
-def warning(*objs):
-    print("WARNING: ", *objs, file=sys.stderr)
+import logging
+
+logger = logging.getLogger('ankiwiktionarygrabber')
     
 from dutchparser import DutchParser
 import re
 
 class Parser:
-    def __init__(self, verbose):
-        self.verbose = verbose
+    def __init__(self):
+        pass
     def setLanguage(self, language):
         self.language = language
     def setWordName(self, wordName):
@@ -23,12 +23,12 @@ class Parser:
         #construct the language-specific parser
         if (self.language == 'Dutch'):
             if languageData:
-                myParser = DutchParser(self.wordName, languageData, self.verbose)
+                myParser = DutchParser(self.wordName, languageData)
                 return myParser.extractData()
             else:
                 return False
         else:
-            print('Sorry, the parser for language "%s" has not been implemented yet.')
+            logger.error('Sorry, the parser for language "%s" has not been implemented yet.')
             return False
         
     def extractLanguageData(self, fetchedText):
@@ -36,12 +36,10 @@ class Parser:
         regex = '==%s==(.*?)(----\s*==[^=]+==|</text>|\{\{bottom\}\}|$)' % self.language
         matches = re.search(regex, fetchedText, re.I|re.S)
         if not matches:
-            print('Did not find target language.')
+            logger.error('Did not find target language.')
             return False
         else:
             targetText = matches.group(1)
-            if self.verbose:
-                print('Found word in target language')
-                #print(type(targetText))
+            logger.info('Found word in target language')
             return targetText
         
