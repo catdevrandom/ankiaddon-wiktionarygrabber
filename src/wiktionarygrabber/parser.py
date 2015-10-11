@@ -40,6 +40,6 @@ class Parser:
             return False
         else:
             targetText = matches.group(1)
-            logger.info('Found word in target language')
+            logger.info('Found word in target language.')
             return targetText
         

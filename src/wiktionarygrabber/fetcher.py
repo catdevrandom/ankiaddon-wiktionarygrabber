@@ -43,16 +43,15 @@ class Fetcher:
         logger.info('Received response.')
         the_page = BeautifulSoup(response.read().decode('utf-8', 'ignore'), self.parser, from_encoding=self.encoding)
         if the_page:    
-            logger.info('Got a page.')
+            logger.info('Received a page.')
             the_text = the_page.find('text') #Get the "text" tag in the Beautiful Soup
             if the_text:
                 the_text = the_text.get_text() #Store it as unicode/str
                 logger.info('Found the text tag.')
-                logger.info('Type: ' + str(type(the_text)))
-                logger.info('Content of text tag: '+ '-----'*10)
-                logger.info(the_text)
-                logger.info('-----'*10)
-                logger.info('-----'*10)
+                logger.debug('Type of text tag: ' + str(type(the_text)))
+                logger.debug('Content of text tag: '+ '-----'*10)
+                logger.debug(the_text)
+                logger.debug('-----'*10)
                 return the_text
             else:
                 logger.warning('Did not get the text tag.')

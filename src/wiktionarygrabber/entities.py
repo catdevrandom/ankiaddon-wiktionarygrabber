@@ -3,9 +3,7 @@ Created on 8 Oct 2015
 
 @author: MBRANDAOCA
 '''
-import logging
 
-logger = logging.getLogger('ankiwiktionarygrabber')
     
 class Word():
     def __init__(self, entry):

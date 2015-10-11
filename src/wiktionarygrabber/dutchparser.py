@@ -40,7 +40,7 @@ class DutchParser:
         pronunciationMatch = re.search('={3,4}\s*Pronunciation\s*={3,4}(.*?)={3,4}[^=]+={3,4}', self.sourceText, re.I|re.M|re.S)
         
         if pronunciationMatch:
-            logger.info('pronunciation match')
+            logger.debug('Found content match about pronunciation.')
             pronunciationText = pronunciationMatch.group(1)
             ipaMatch = re.search('.*?\{\{IPA\|([^}]+)\}\}', pronunciationText, re.I|re.M|re.S)
             if ipaMatch:
@@ -59,7 +59,7 @@ class DutchParser:
                         self.myWord.audio = item
             return True
         else:
-            logger.warning('no pronunciation match')
+            logger.warning('Could not match content about pronunciation.')
             return False
         
 
@@ -76,7 +76,7 @@ class DutchParser:
                 else:
                     word_classes[item.group(1)+'-2'] = item.group(2) #this needs fixing. allow for more than one entry in each word class
             self.myWord.classes = word_classes
-            logger.info(word_classes)
+            logger.debug("Found the following word classes: %s"% word_classes)
         else:
             logger.info('Could not find word classes list.')
 
@@ -89,9 +89,10 @@ class DutchParser:
         #Dutch noun template: {{nl-noun|n|huizen|huisje}}        
 
         nounContent = self.myWord.classes.get("Noun")
-        logger.info('noun content:----------------')
-        logger.info(nounContent)
-        logger.info('-------'*10)
+        logger.info('Found content for Noun.')
+        logger.debug('Noun content:')
+        logger.debug(nounContent)
+        logger.debug('-------'*10)
         #Split the parameters
         matchParameters = re.search('\{\{([^}]+)\}\}', nounContent, re.S|re.I|re.M)
         if matchParameters:
@@ -112,7 +113,7 @@ class DutchParser:
             if len(allParameters)>3:
                 self.myWord.diminutive = allParameters[3]
         else:
-            logger.info('no match')        
+            logger.info('Could not find content inside Noun text.')        
         return False
             
     def getVerb(self):

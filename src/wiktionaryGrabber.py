@@ -52,26 +52,28 @@ from aqt import browser
 # import wiktionarygrabber module with the actual code
 import wiktionarygrabber
 
-def initWiktionaryGrabber(self):
+def initLog(self):
     """ Initialize logging """
-    fileHandler = logging.FileHandler('ankiwiktionarygrabber.log')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fileHandler = logging.FileHandler('ankiwiktionarygrabber.log')    
+    fileHandler.setFormatter(formatter)
     fileHandler.setLevel(logging.DEBUG)
     streamHandler = logging.StreamHandler()
-    streamHandler.setLevel(logging.ERROR)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    fileHandler.setFormatter(formatter)
     streamHandler.setFormatter(formatter)
+    streamHandler.setLevel(logging.ERROR)
     
-    logger = logging.getLogger("ankiwiktionarygrabber")
-    logger.addHandler(fileHandler)
-    logger.addHandler(streamHandler)
+    myLogger = logging.getLogger("ankiwiktionarygrabber")
+    myLogger.setLevel(logging.DEBUG)
+    myLogger.addHandler(fileHandler)
+    myLogger.addHandler(streamHandler)
+    return myLogger
+
     
-    logger.info('Logging started...')
-    wiktionaryGrabber(self)
-    logger.info('Logging finished.')
 
 def wiktionaryGrabber(self):
-    logger = logging.getLogger("ankiwiktionarygrabber")
+    logger = initLog(self) #Initialize logging
+    logger.info('Logging started.')
+    
     """ Utility function that fetches info from Wiktionary to add to the notes."""
     ipa_field = 'IPA'
     plural_field = "Plural"
@@ -87,19 +89,25 @@ def wiktionaryGrabber(self):
     
         #Call the grabber method
         myWord = wiktionarygrabber.get_wiktionary_fields(entry, "Dutch")
-        logger.info(myWord.string().encode("utf-8"))
+        if myWord:
+            logger.debug("Retrieved word: %s" % myWord.string().encode("utf-8"))
+        else:
+            logger.warning("Could not find word %s" % entry)
     
         if myWord:
             for name in mw.col.models.fieldNames(self.note.model()):
                 if name==ipa_field:
+                    logger.debug("Found IPA: '%s'" % myWord.ipa)
                     self.note[ipa_field] = myWord.ipa
                 if name==plural_field:
+                    logger.debug("Found plural: '%s'" % myWord.plural)
                     self.note[plural_field] = myWord.plural
                 if name==gender_field:
+                    logger.debug("Found gender: '%s'" % myWord.gender)
                     self.note[gender_field] = myWord.gender
                     if myWord.gender in ("m", "f", "m, f", "f, m"):
                         self.note[article_field] = "de"
-                    elif myWord.gender in ("n"):
+                    elif myWord.gender == 'n':
                         self.note[article_field] = "het"
                     else:
                         self.note[article_field] = ""
@@ -110,10 +118,12 @@ def wiktionaryGrabber(self):
         else:
             logger.error("Failed to find word '%s' in Dutch. Please check if Wiktionary has it: %s" % (entry, "https://en.wiktionary.org/wiki/"+entry))
 
+        logger.info('Logging finished.')
+
 def setupButtons(self):
     """ Adds word wrap keyboard shortcut and button to the note editor. """
     icons_dir = os.path.join(mw.pm.addonFolder(), 'wiktionarygrabber', 'icons')
-    b = self._addButton("wiktionaryButton", lambda s=self: initWiktionaryGrabber(self),
+    b = self._addButton("wiktionaryButton", lambda s=self: wiktionaryGrabber(self),
             text=" ", tip="Add fields with Wiktionary data")
     b.setIcon(QIcon(os.path.join(icons_dir, 'wiktionary.png')))
     
